@@ -12,10 +12,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Gisgust Button',
       theme: ThemeData.light(),
-      initialRoute: TopScreen.SCREEN_ROUTE,
+      initialRoute: TopScreen.SCREEN_PATH,
       routes: {
-        TopScreen.SCREEN_ROUTE: (context) => TopScreen(),
-        MainScreen.SCREEN_ROUTE: (context) => MainScreen(),
+        TopScreen.SCREEN_PATH: (context) => TopScreen(),
+        MainScreen.SCREEN_PATH: (context) => MainScreen(),
       },
     );
   }

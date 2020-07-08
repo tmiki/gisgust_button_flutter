@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gisgustbuttonflutter/screens/main_screen.dart';
 
 class TopScreen extends StatelessWidget {
-  static const String SCREEN_ROUTE = '/';
+  static const String SCREEN_PATH = '/';
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class TopScreen extends StatelessWidget {
               FlatButton(
                 child: Text('Start'),
                 onPressed: () {
-                  Navigator.pushNamed(context, MainScreen.SCREEN_ROUTE);
+                  Navigator.pushNamed(context, MainScreen.SCREEN_PATH);
                 },
               ),
             ],
