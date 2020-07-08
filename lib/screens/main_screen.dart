@@ -93,7 +93,6 @@ class _MainScreenState extends State<MainScreen> {
                 markerId: markerId,
                 position: centerPos,
                 infoWindow: InfoWindow(title: markerIdStr, snippet: markerIdStr),
-                onTap: () {},
               );
 
               setState(() {
