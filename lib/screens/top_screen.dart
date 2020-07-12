@@ -46,18 +46,24 @@ class _TopScreenState extends State<TopScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Container(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    'Gisgust Button',
-                    style: TextStyle(
-                      fontSize: 20.0,
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      'Gisgust Button',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                      ),
                     ),
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text('${this._isLoggedIn ? this._user.displayName : "You are not logged in."}'),
+                Expanded(
+                  flex: 6,
+                  child: Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('${this._isLoggedIn ? '${this._user.email} is logged in.' : "You are not logged in."}'),
+                  ),
                 ),
               ],
             ),

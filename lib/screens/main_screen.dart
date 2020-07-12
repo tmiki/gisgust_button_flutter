@@ -56,23 +56,27 @@ class _MainScreenState extends State<MainScreen> {
     print('Preparing to lisnten the Firestore collection "${UserDisgust.firestoreCollectionName}".');
 
     try {
-      this._firestore.collection(UserDisgust.firestoreCollectionName).orderBy('datetime', descending: true).snapshots().listen((QuerySnapshot event) {
-        event.documents.forEach((DocumentSnapshot element) {
-          print('document data: ${element.data.toString()}');
-          UserDisgust disgust = UserDisgust(
-            markerId: element.documentID,
-            datetime: element.data['datetime'],
-            userId: element.data['userId'],
-            coords: GeoPoint(element.data['coords']['latitude'], element.data['coords']['longitude']),
-          );
-          Marker marker = this._buildMarker(element.documentID, element.data['datetime'], disgust);
-          setState(() {
-            this._markers.add(marker);
+      this._firestore.collection(UserDisgust.firestoreCollectionName).orderBy('datetime', descending: true).snapshots().listen(
+        (QuerySnapshot event) {
+          event.documentChanges.forEach((DocumentChange element) {
+            print('document data: ${element.document.data.toString()}');
+            UserDisgust disgust = UserDisgust(
+              markerId: element.document.documentID,
+              datetime: element.document.data['datetime'],
+              userId: element.document.data['userId'],
+              coords: GeoPoint(element.document.data['coords']['latitude'], element.document.data['coords']['longitude']),
+            );
+            Marker marker = this._buildMarker(element.document.documentID, element.document.data['datetime'], disgust);
+
+            setState(() {
+              this._markers.add(marker);
+            });
           });
-        });
-      }, onError: (error) {
-        print('An error occurred at the listner to the Firestore collection. $error');
-      });
+        },
+        onError: (error) {
+          print('An error occurred at the listner to the Firestore collection. $error');
+        },
+      );
     } catch (e) {
       print(e);
     }
@@ -95,8 +99,8 @@ class _MainScreenState extends State<MainScreen> {
     );
 
     // Store the marker to Firestore
-    this._firestore.collection(UserDisgust.firestoreCollectionName).add(disgust.convertMap());
     print("Storing a disgust data to the Firestore. ${disgust}");
+    this._firestore.collection(UserDisgust.firestoreCollectionName).add(disgust.convertMap());
 
     // Create a Marker object for GoogleMap.
     Marker marker = this._buildMarker(markerIdStr, unixEpochMs, disgust);
