@@ -39,11 +39,50 @@ class _MainScreenState extends State<MainScreen> {
     print('The user location. longitude:${_userPosition.longitude}, latitude:${_userPosition.latitude}');
   }
 
+  Marker _buildMarker(String markerIdStr, int unixEpochMs, UserDisgust disgust) {
+    MarkerId markerId = MarkerId(markerIdStr);
+    Marker marker = Marker(
+      markerId: markerId,
+      position: LatLng(disgust.coords.latitude, disgust.coords.longitude),
+      infoWindow: InfoWindow(title: 'recorded at $unixEpochMs', snippet: 'latitude: ${disgust.coords.latitude}, longitude: ${disgust.coords.longitude}'),
+    );
+    return marker;
+  }
+
+  //
+  // Retrieves continuously disgusts stored on the Firestore.
+  //
+  void _fetchDisgusts() async {
+    print('Preparing to lisnten the Firestore collection "${UserDisgust.firestoreCollectionName}".');
+
+    try {
+      this._firestore.collection(UserDisgust.firestoreCollectionName).orderBy('datetime', descending: true).snapshots().listen((QuerySnapshot event) {
+        event.documents.forEach((DocumentSnapshot element) {
+          print('document data: ${element.data.toString()}');
+          UserDisgust disgust = UserDisgust(
+            markerId: element.documentID,
+            datetime: element.data['datetime'],
+            userId: element.data['userId'],
+            coords: GeoPoint(element.data['coords']['latitude'], element.data['coords']['longitude']),
+          );
+          Marker marker = this._buildMarker(element.documentID, element.data['datetime'], disgust);
+          setState(() {
+            this._markers.add(marker);
+          });
+        });
+      }, onError: (error) {
+        print('An error occurred at the listner to the Firestore collection. $error');
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
   //
   // Creates and puts a marker to the Google Map.
   // Stores the marker information to Firestore.
   //
-  void _putAndRecordPin() async {
+  void _putAndStoreDisgust() async {
     int unixEpochMs = DateTime.now().millisecondsSinceEpoch;
     String markerIdStr = 'markerId_${this._user.uid}_${unixEpochMs.toString()}';
 
@@ -51,29 +90,18 @@ class _MainScreenState extends State<MainScreen> {
     UserDisgust disgust = UserDisgust(
       markerId: markerIdStr,
       userId: this._user.uid,
-      coords: GeoFirePoint(this._cameraPosition.target.latitude, this._cameraPosition.target.longitude),
+      coords: GeoPoint(this._cameraPosition.target.latitude, this._cameraPosition.target.longitude),
       datetime: unixEpochMs,
     );
 
-//    this._firestore.collection(UserDisgust.firestoreCollectionName).add();
-    print(disgust);
+    // Store the marker to Firestore
+    this._firestore.collection(UserDisgust.firestoreCollectionName).add(disgust.convertMap());
+    print("Storing a disgust data to the Firestore. ${disgust}");
 
     // Create a Marker object for GoogleMap.
-    MarkerId markerId = MarkerId(markerIdStr);
-    Marker marker = Marker(
-      markerId: markerId,
-      position: this._cameraPosition.target,
-      infoWindow: InfoWindow(title: markerIdStr, snippet: markerIdStr),
-    );
-
-    setState(() {
-      this._markers.add(marker);
-    });
+    Marker marker = this._buildMarker(markerIdStr, unixEpochMs, disgust);
 
     print('There are "${this._markers.length} markers.');
-    //              this._markers.forEach((marker) {
-    //                print('${marker.markerId.value}:(${marker.position.latitude}, ${marker.position.longitude})');
-    //              });
   }
 
   void _updateCurrentUser() async {
@@ -96,6 +124,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     this._updateCurrentUser();
+    this._fetchDisgusts();
   }
 
   @override
@@ -184,7 +213,7 @@ class _MainScreenState extends State<MainScreen> {
             child: FlatButton(
               child: Text('Put a pin on the current camera position.'),
               color: Color(0x7fffffff),
-              onPressed: this._user != null ? _putAndRecordPin : null,
+              onPressed: this._user != null ? _putAndStoreDisgust : null,
             ),
           ),
         ],
