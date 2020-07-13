@@ -48,10 +48,36 @@ android {
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+
+            // You need to get your own Google Map API Key and put it into your "secret.properties" file.
+            //
+            // 1. Get your own API key by following the official document below.
+            //    https://developers.google.com/maps/documentation/android-sdk/get-api-key
+            // 2. Put your API key into the "secret.properties" file.
+            //    secret.properties:
+            //      GOOGLE_MAPS_API_KEY_DEBUG=YOUR-API-KEY
+            def secretProps = new Properties()
+            secretProps.load(new FileInputStream(file('secret.properties')))
+            manifestPlaceholders = [GOOGLE_MAPS_API_KEY: secretProps['GOOGLE_MAPS_API_KEY_DEBUG']]
+        }
+
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
+
+            // You need to get your own Google Map API Key and put it into your "secret.properties" file.
+            //
+            // 1. Get your own API key by following the official document below.
+            //    https://developers.google.com/maps/documentation/android-sdk/get-api-key
+            // 2. Put your API key into the "secret.properties" file.
+            //    secret.properties:
+            //      GOOGLE_MAPS_API_KEY_RELEASE=YOUR-API-KEY
+            def secretProps = new Properties()
+            secretProps.load(new FileInputStream(file('secret.properties')))
+            manifestPlaceholders = [GOOGLE_MAPS_API_KEY: secretProps['GOOGLE_MAPS_API_KEY_RELEASE']]
         }
     }
 }
